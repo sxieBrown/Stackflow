@@ -1,0 +1,134 @@
+from mpmath import nsum, exp, inf
+import numpy as np
+import pylab
+from scipy.optimize import curve_fit
+import pandas as pd
+
+# get the data
+y=[]
+x=[]
+for t in range(0,100,10):
+    x += [t]
+    y += [round(float((nsum(lambda n: exp(-(0.0002)*(n)*t),[0, inf]))),3)]
+
+# curve fitting
+def test(t,D):
+    return  [round(float((nsum(lambda n: exp(-(0.0002)*(n)*t),[0, inf]))),3)]
+
+
+parameters, params_covariance=curve_fit(test, x, y)
+
+print(parameters)
+
+
+
+---------------------------------------------------------------------------
+TypeError                                 Traceback (most recent call last)
+<ipython-input-18-087beb466331> in <module>
+     17 
+     18 
+---> 19 parameters, params_covariance=curve_fit(test, x, y)
+     20 
+     21 print(parameters)
+
+~\Anaconda3\lib\site-packages\scipy\optimize\minpack.py in curve_fit(f, xdata, ydata, p0, sigma, absolute_sigma, check_finite, bounds, method, jac, **kwargs)
+    742         # Remove full_output from kwargs, otherwise we're passing it in twice.
+    743         return_full = kwargs.pop('full_output', False)
+--> 744         res = leastsq(func, p0, Dfun=jac, full_output=1, **kwargs)
+    745         popt, pcov, infodict, errmsg, ier = res
+    746         cost = np.sum(infodict['fvec'] ** 2)
+
+~\Anaconda3\lib\site-packages\scipy\optimize\minpack.py in leastsq(func, x0, args, Dfun, full_output, col_deriv, ftol, xtol, gtol, maxfev, epsfcn, factor, diag)
+    382     if not isinstance(args, tuple):
+    383         args = (args,)
+--> 384     shape, dtype = _check_func('leastsq', 'func', func, x0, args, n)
+    385     m = shape[0]
+    386     if n > m:
+
+~\Anaconda3\lib\site-packages\scipy\optimize\minpack.py in _check_func(checker, argname, thefunc, x0, args, numinputs, output_shape)
+     24 def _check_func(checker, argname, thefunc, x0, args, numinputs,
+     25                 output_shape=None):
+---> 26     res = atleast_1d(thefunc(*((x0[:numinputs],) + args)))
+     27     if (output_shape is not None) and (shape(res) != output_shape):
+     28         if (output_shape[0] != 1):
+
+~\Anaconda3\lib\site-packages\scipy\optimize\minpack.py in func_wrapped(params)
+    454     if transform is None:
+    455         def func_wrapped(params):
+--> 456             return func(xdata, *params) - ydata
+    457     elif transform.ndim == 1:
+    458         def func_wrapped(params):
+
+<ipython-input-18-087beb466331> in test(t, D)
+     14 # curve fitting
+     15 def test(t,D):
+---> 16     return  [round(float((nsum(lambda n: exp(-(0.0002)*(n)*t),[0, inf]))),3)]
+     17 
+     18 
+
+~\Anaconda3\lib\site-packages\mpmath\calculus\extrapolation.py in nsum(ctx, f, *intervals, **options)
+   1716         return v
+   1717 
+-> 1718     return +ctx.adaptive_extrapolation(update, emfun, options)
+   1719 
+   1720 
+
+~\Anaconda3\lib\site-packages\mpmath\calculus\extrapolation.py in adaptive_extrapolation(ctx, update, emfun, kwargs)
+   1163                 print("-"*70)
+   1164                 print("Adding terms #%i-#%i" % (index, index+step))
+-> 1165             update(partial, xrange(index, index+step))
+   1166             index += step
+   1167 
+
+~\Anaconda3\lib\site-packages\mpmath\calculus\extrapolation.py in update(partial_sums, indices)
+   1704             psum = ctx.zero
+   1705         for k in indices:
+-> 1706             psum = psum + g(ctx.mpf(k))
+   1707             partial_sums.append(psum)
+   1708 
+
+~\Anaconda3\lib\site-packages\mpmath\calculus\extrapolation.py in g(k)
+   1751         def g(k):
+   1752             args[d] = k
+-> 1753             return f(*args)
+   1754         return True, g
+   1755 
+
+~\Anaconda3\lib\site-packages\mpmath\calculus\extrapolation.py in g(*args)
+   1806             args = list(args)
+   1807             args[dim] += a
+-> 1808             return f(*args)
+   1809     #print "Standardized infinity along dimension", dim, a, b
+   1810     return standardize_infinite(ctx, g, intervals[:-1])
+
+<ipython-input-18-087beb466331> in <lambda>(n)
+     14 # curve fitting
+     15 def test(t,D):
+---> 16     return  [round(float((nsum(lambda n: exp(-(0.0002)*(n)*t),[0, inf]))),3)]
+     17 
+     18 
+
+~\Anaconda3\lib\site-packages\mpmath\ctx_mp_python.py in f(x, **kwargs)
+   1001         def f(x, **kwargs):
+   1002             if type(x) not in ctx.types:
+-> 1003                 x = ctx.convert(x)
+   1004             prec, rounding = ctx._prec_rounding
+   1005             if kwargs:
+
+~\Anaconda3\lib\site-packages\mpmath\ctx_mp_python.py in convert(ctx, x, strings)
+    646         if isinstance(x, complex):
+    647             return ctx.make_mpc((from_float(x.real), from_float(x.imag)))
+--> 648         if type(x).__module__ == 'numpy': return ctx.npconvert(x)
+    649         if isinstance(x, numbers.Rational): # e.g. Fraction
+    650             try: x = rational.mpq(int(x.numerator), int(x.denominator))
+
+~\Anaconda3\lib\site-packages\mpmath\ctx_mp_python.py in npconvert(ctx, x)
+    679         if isinstance(x, np.complexfloating):
+    680             return ctx.make_mpc((from_npfloat(x.real), from_npfloat(x.imag)))
+--> 681         raise TypeError("cannot create mpf from " + repr(x))
+    682 
+    683     def isnan(ctx, x):
+
+TypeError: cannot create mpf from array([mpf('0.0'), mpf('0.0'), mpf('0.0'), mpf('0.0'), mpf('0.0'),
+       mpf('0.0'), mpf('0.0'), mpf('0.0'), mpf('0.0'), mpf('0.0')],
+      dtype=object)
